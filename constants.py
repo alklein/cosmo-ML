@@ -3,15 +3,8 @@
 import os
 import sys
 import math
-#import scipy
-#import pylab
 import numpy as np
-#import matplotlib as mpl
-#import matplotlib.cm as cm
-#import matplotlib.mlab as mlab
-#import matplotlib.pyplot as plt
 
-#from pylab import *
 from random import *
 from numpy import log10
 from optparse import OptionParser, OptionGroup
@@ -32,7 +25,7 @@ N200c, M200c, R200c, N500c, M500c, R500c = range(13, 19)
 Np = 128**3
 Nh = 62897
 
-scalefactor = 1. # for z = 0 ?
+scalefactor = 1. # for z = 0
 a = scalefactor
 box = 200.
 Ndm = 512.
@@ -41,7 +34,6 @@ om = 0.27
 Mpc2cm = 3.08560e+24
 H0_cgs = 3.24086e-18
 
-#x_unit    = (a*box/h0/Ndm)*Mpc2cm #[Mpc/h]#
 x_unit = box/Ndm
 time_unit = 2/(3*H0_cgs*h0*(om**.5))*a**2 #[s?]#
 vel_unit  = (x_unit/time_unit)/(1e5) #[km/s]#

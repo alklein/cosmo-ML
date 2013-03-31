@@ -43,7 +43,7 @@ H0_cgs = 3.24086e-18
 
 #x_unit    = (a*box/h0/Ndm)*Mpc2cm #[Mpc/h]#
 x_unit = box/Ndm
-time_unit = 2/(3*H0_cgs*h0*sqrt(om))*a**2 #[s?]#
+time_unit = 2/(3*H0_cgs*h0*(om**.5))*a**2 #[s?]#
 vel_unit  = (x_unit/time_unit)/(1e5) #[km/s]#
 
 if __name__ == '__main__':
