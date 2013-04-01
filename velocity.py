@@ -1,15 +1,14 @@
-"""
----TODO---
+#!/usr/bin/env python                                                                                           
 
-Easy:
-   fix axes
- ~ LaTeX axis labels
-   try different combos of linear vs. log plots
+"""                                                                                                             
 
-Medium:
-   compare to uniform distribution
-   test robustness of distribution via K-S test
+@file velocity.py
+@brief Script to learn velocity distributions within DM halos
+@author Andrea Klein       <alklein@alumni.stanford.edu>
+
 """
+
+__author__   = "Andrea Klein"
 
 from constants import *
 
@@ -154,7 +153,7 @@ particles[:,VX] *= vel_unit
 particles[:,VY] *= vel_unit
 particles[:,VZ] *= vel_unit
 #--------------- Order and Cut by Mass -----------------#
-""" TODO """
+""" TODO: cut by mass """
 halos = halos[halos[:,M200h].argsort()][::-1]
 print '\t highest mass of a halo: 10 ^',np.log10(halos[0][M200h])
 print '\t lowest mass of a halo: 10 ^',np.log10(halos[-1][M200h])
