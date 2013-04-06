@@ -30,9 +30,10 @@ sigma_8      = 0.80
 w_de         = -1.0
 
 # Hy Trac sim indices
-ID, X, Y, Z, VX, VY, VZ = range(7)
-N200a, M200a, R200a, s200a, N500a, M500a, R500a, s500a = range(7, 15)
-N200c, M200c, R200c, s200c, N500c, M500c, R500c, s500c = range(15, 23)
+ID, X, Y, Z, VX, VY, VZ = range(7) # for halos and particles
+H_ID # for particles only
+N200a, M200a, R200a, s200a, N500a, M500a, R500a, s500a = range(7, 15) # for halos only
+N200c, M200c, R200c, s200c, N500c, M500c, R500c, s500c = range(15, 23) # for halos only
 
 # Hy Trac particle + halo counts
 Np = 128**3 # TODO: verify
