@@ -4,8 +4,8 @@ File: parse_particles.cpp
 Brief: Script to extract particles from binary simulation output file
 Author: Andrea Klein       <alklein@alumni.stanford.edu>
 
-Usage: g++ parse_particles.cpp
-       ./a.out > particles.txt
+Usage: g++ parse_particles.cpp -o parser
+       ./parser > particles.txt
 Note: the infile halo_part.z=00.0000 must be in the same directory.
 
 */
@@ -52,13 +52,12 @@ int readsim(string fname, _particle *pp)
 int main()
 {
   _particle *pp = new _particle[Np];
-
-  readsim("halo_part.z=00.0000",pp);
+  readsim("halo_part.z=00.0000", pp);
 
   for (int i=0; i<Np; i++) {
     cout << pp[i].ip << ' ' 
          << pp[i].ih << ' '
-	 << pp[i].x << ' ' << pp[i].y << ' ' << pp[i].z << ' '
+	 << pp[i].x  << ' ' << pp[i].y << ' ' << pp[i].z << ' '
 	 << pp[i].vx << ' ' << pp[i].vy << ' ' << pp[i].vz << endl;
   }
 
