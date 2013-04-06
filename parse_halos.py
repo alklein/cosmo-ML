@@ -107,7 +107,6 @@ for i in range(nh):
   M200a[i], = struct.unpack('f',FileContent[first_byte+52:first_byte+56])
   R200a[i], = struct.unpack('f',FileContent[first_byte+56:first_byte+60])
   s200a[i], = struct.unpack('f',FileContent[first_byte+60:first_byte+64])
-
   N500a[i], = struct.unpack('i',FileContent[first_byte+64:first_byte+68])
   M500a[i], = struct.unpack('f',FileContent[first_byte+68:first_byte+72])
   R500a[i], = struct.unpack('f',FileContent[first_byte+72:first_byte+76])
