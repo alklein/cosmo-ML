@@ -1,6 +1,6 @@
 This is a research project in cosmology and machine learning. 
 The goal is to learn the velocity distributions within dark matter halos using support vector regression. 
-I am receiving course credit via the Machine Learning class 10-602, Independent Study: Research at Carnegie Mellon University.
+I am receiving course credit via the Machine Learning class 10-602, Independent Study: Research, at Carnegie Mellon University.
 
 My work is supervised by:
 
@@ -10,8 +10,9 @@ My work is supervised by:
 I make use of dark matter N-body simulations made by Hy Trac (Assistant Professor, Physics) - hytrac@cmu.edu.
 I'm currently working with the following catalogs (at redshift 0):
     halo.z=00.0000
+    subhalo.z=00.0000
     halo_part.z=00.0000
-The halos were extracted by Michelle Ntampaka (Ph.D. student, Physics) - cmhicks@andrew.cmu.edu.
+The subhalos were extracted by Michelle Ntampaka (Ph.D. student, Physics) - cmhicks@andrew.cmu.edu.
 
 My code:
 
