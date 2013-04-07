@@ -8,10 +8,10 @@ I am receiving course credit via the Machine Learning class 10-602, Independent 
 My Code
 -------
 
-   parse_halos.py - Python parser for N-body binary output file describing halos 
-   parse_particles.cpp - C++ parser for N-body binary output file describing individual particles
-   constants.py - Relevant constants, including scientific quantities, simulation parameters, and named indices for use with parsed data     		      
-   velocity.py - Python script to learn the velocity distributions. Run "python velocity.py -h True" for more details.
+*   parse_halos.py - Python parser for N-body binary output file describing halos 
+*   parse_particles.cpp - C++ parser for N-body binary output file describing individual particles
+*   constants.py - Relevant constants, including scientific quantities, simulation parameters, and named indices for use with parsed data     		      
+*   velocity.py - Python script to learn the velocity distributions. Run "python velocity.py -h True" for more details.
 
 Acknowledgements
 ----------------
