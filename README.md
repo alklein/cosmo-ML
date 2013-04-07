@@ -1,5 +1,5 @@
-10-602 Research Project ![logo](https://github.com/alklein/cosmo-ML/blob/master/bone.jpeg)
-=========================================================================================
+10-602 Research Project
+=======================
 
 This is a research project in cosmology and machine learning. 
 The goal is to learn the velocity distributions within dark matter halos using support vector regression. 
