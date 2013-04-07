@@ -31,7 +31,7 @@ w_de         = -1.0
 
 # Hy Trac sim indices
 ID, X, Y, Z, VX, VY, VZ = range(7) # for halos and particles
-H_ID # for particles only
+H_ID = 7 # for particles only
 N200a, M200a, R200a, s200a, N500a, M500a, R500a, s500a = range(7, 15) # for halos only
 N200c, M200c, R200c, s200c, N500c, M500c, R500c, s500c = range(15, 23) # for halos only
 

@@ -72,10 +72,7 @@ def separation(particle, halo):
 def get_halo_ID(particle, halos):
     for halo in halos:
         sep = separation(particle, halo) 
-#        print 'particle:',particle[ID],'halo:',halo[ID],'separation:',sep,'R200h:',halo[R200h]
-        if separation(particle, halo) < 2*halo[R200h]: 
-#            print 'binding particle',particle[ID],'to halo',halo[ID]
-            return halo[ID]
+        if separation(particle, halo) < 2*halo[R200a]: return halo[ID]
     return -1
 
 #--------------- Velocities (all in km/s) --------------#
@@ -143,6 +140,8 @@ VL_Phi_dot = [Phi_dot(sh[X], sh[Y], sh[Z], sh[Vx], sh[Vy], sh[Vz]) for sh in VL]
 if opts.verbose: print '\n ... Loading Hy Trac\'s Simulations ... \n'
 particles = np.loadtxt('particles.txt')
 halos = np.loadtxt('halos.txt')
+#------------- Reorder Particle Properties -------------#
+particles = np.column_stack((particles[:,0], particles[:,2:], particles[:,1]))
 #------------- Rescale Particle Positions --------------#
 if opts.verbose: print '\t position conversion factor:',x_unit
 particles[:,X] *= x_unit
@@ -155,25 +154,14 @@ particles[:,VY] *= vel_unit
 particles[:,VZ] *= vel_unit
 #--------------- Order and Cut by Mass -----------------#
 """ TODO: cut by mass """
-halos = halos[halos[:,M200h].argsort()][::-1]
-print '\t highest mass of a halo: 10 ^',np.log10(halos[0][M200h])
-print '\t lowest mass of a halo: 10 ^',np.log10(halos[-1][M200h])
+halos = halos[halos[:,M200a].argsort()][::-1]
+print '\t highest mass of a halo: 10 ^',np.log10(halos[0][M200a])
+print '\t lowest mass of a halo: 10 ^',np.log10(halos[-1][M200a])
 print '\t range of halo Xs:',min(halos[:,X]),max(halos[:,X])
 print '\t range of particle Xs:',min(particles[:,X]),max(particles[:,X])
 print '\t range of halo VXs:',min(halos[:,VX]), max(halos[:,VX])
 print '\t range of particle VXs:',min(particles[:,VX]), max(particles[:,VX])
-print '\t range of halo virial radii:',min(halos[:,R200h]), max(halos[:,R200h])
-#-------------- Assign Particles to Halos --------------#
-if opts.verbose: print '\n ... Assigning particles to 2 heaviest halos ... \n'
-halo_IDs = [get_halo_ID(particle, halos[:2]) for particle in particles]
-print '\t number of assigned particles:',len([i for i in halo_IDs if i > -1])
-print '\t 2*radius of most massive halo:',2*halos[0][R200h]
-print '\t min sep of any particle to this halo:',min([separation(particle, halos[0]) for particle in particles])
-print '\t position of 1st particle:',particles[0][X],particles[0][Y],particles[0][Z]
-print '\t position of 1st halo:',halos[0][X],halos[0][Y],halos[0][Z]
-print '\t separation:',separation(particles[0], halos[0])
-
-#particles = np.column_stack((particles, halo_IDs))
+print '\t range of halo virial radii:',min(halos[:,R200a]), max(halos[:,R200a])
 
 #-------------------------------------------------------#
 #---------------------- MAKE PLOTS ---------------------#
@@ -347,7 +335,7 @@ if opts.hy_plots:
     print some_halos[0]
     print '\t # of particles in 5 x 5 square:',len(some_particles)
     print '\t # of halo centers in 5 x 5 square:',len(some_halos)
-    print '\t range of halo R200h values:',min(some_halos[:,R200h]),max(some_halos[:,R200h])
+    print '\t range of halo R200a values:',min(some_halos[:,R200a]),max(some_halos[:,R200a])
     halo_IDs = [get_halo_ID(particle, some_halos) for particle in some_particles]
     print '\t number of assigned particles from 5 x 5 square:',len([i for i in halo_IDs if i > -1])
     print
@@ -363,7 +351,7 @@ if opts.hy_plots:
     print '\t first halo center:'
     first_halo = some_halos[0][ID]
     print first_halo
-    print '\t its purported mass:',some_halos[0][M200h]
+    print '\t its purported mass:',some_halos[0][M200a]
     sample = np.array([p for p in labeled_particles if p[-1] == first_halo])
     print '\t # of particles assigned to it:',len(sample)
     print '\t their X coords:'
