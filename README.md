@@ -21,9 +21,13 @@ My work is supervised by:
 *   Shirley Ho (Assistant Professor, Physics) - shirleyh@andrew.cmu.edu
 *   Jeff Schneider (Associate Research Professor, Robotics Institute / School of Computer Science) - jeff.schneider@cs.cmu.edu
 
-I make use of dark matter N-body simulations made by Hy Trac (Assistant Professor, Physics) - hytrac@cmu.edu.
+I make use of dark matter N-body simulations made by:
+
+*    Hy Trac (Assistant Professor, Physics) - hytrac@cmu.edu
+
 I'm currently working with the following catalogs (at redshift 0):
 *    halo.z=00.0000
 *    subhalo.z=00.0000
 *    halo_part.z=00.0000
-The subhalos were extracted by Michelle Ntampaka (Ph.D. student, Physics) - cmhicks@andrew.cmu.edu.
+
+The subhalos were extracted by Michelle Ntampaka (Ph.D. student, Physics) - cmhicks@andrew.cmu.edu
