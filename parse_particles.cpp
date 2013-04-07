@@ -16,7 +16,9 @@ Note: the infile halo_part.z=00.0000 must be in the same directory.
 
 using namespace std;
 
-int Np = 128*128*128;
+// Np = number of particles assigned to halos.
+// Total number of particles is ~ 1 billion.
+int Np = 333796680; 
 
 struct _particle
 {

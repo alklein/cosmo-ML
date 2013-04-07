@@ -140,6 +140,9 @@ VL_Phi_dot = [Phi_dot(sh[X], sh[Y], sh[Z], sh[Vx], sh[Vy], sh[Vz]) for sh in VL]
 if opts.verbose: print '\n ... Loading Hy Trac\'s Simulations ... \n'
 particles = np.loadtxt('particles.txt')
 halos = np.loadtxt('halos.txt')
+if opts.verbose:
+    print '\t Number of particles:',len(particles)
+    print '\t Number of halos:',len(halos)
 #------------- Reorder Particle Properties -------------#
 particles = np.column_stack((particles[:,0], particles[:,2:], particles[:,1]))
 #------------- Rescale Particle Positions --------------#
