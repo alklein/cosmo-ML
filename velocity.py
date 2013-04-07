@@ -91,6 +91,22 @@ def Phi_dot(X, Y, Z, VX, VY, VZ):
     denom = (X**2 + Y**2 + Z**2)*((X**2 + Y**2)**.5)
     return num/denom
 
+#------------------- Particle Extraction -------------------#
+
+def get_particles(particle_file, halo_ID):
+    P = []
+    for line in open(particle_file):
+        particle = [float(val) for val in line.split()]
+        cur_ID = particle[1]
+        if cur_ID > halo_ID: 
+            P = np.array(P)
+            if len(P) > 0: return np.column_stack((P[:,0], P[:,2:], P[:,1]))
+            else: return P
+        if cur_ID == halo_ID: P.append(particle)
+    if len(P) > 0: return np.column_stack((P[:,0], P[:,2:], P[:,1]))
+    else: P = np.array(P)
+
+
 #-----------------------------------------------------------#
 #---------------------- PARSE OPTIONS ----------------------#
 #-----------------------------------------------------------#
@@ -138,8 +154,11 @@ VL_Phi_dot = [Phi_dot(sh[X], sh[Y], sh[Z], sh[Vx], sh[Vy], sh[Vz]) for sh in VL]
 #-------------------------------------------------------#
 
 if opts.verbose: print '\n ... Loading Hy Trac\'s Simulations ... \n'
-particles = np.loadtxt('particles.txt')
 halos = np.loadtxt('halos.txt')
+first_ID = halos[0][ID]
+print '\t ID of first halo:',first_ID
+# TEMP: only considering particles assigned to 1st halo
+particles = get_particles('particles.txt', first_ID) 
 if opts.verbose:
     print '\t Number of particles:',len(particles)
     print '\t Number of halos:',len(halos)
