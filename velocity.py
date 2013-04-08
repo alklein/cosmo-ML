@@ -155,35 +155,18 @@ VL_Phi_dot = [Phi_dot(sh[X], sh[Y], sh[Z], sh[Vx], sh[Vy], sh[Vz]) for sh in VL]
 
 if opts.verbose: print '\n ... Loading Hy Trac\'s Simulations ... \n'
 halos = np.loadtxt('halos.txt')
-first_ID = halos[0][ID]
-print '\t ID of first halo:',first_ID
 # TEMP: only considering particles assigned to 1st halo
-particles = get_particles('particles.txt', first_ID) 
-if opts.verbose:
-    print '\t Number of particles:',len(particles)
-    print '\t Number of halos:',len(halos)
+particles = get_particles('particles.txt', halos[0][ID]) 
 #------------- Reorder Particle Properties -------------#
 particles = np.column_stack((particles[:,0], particles[:,2:], particles[:,1]))
-#------------- Rescale Particle Positions --------------#
-if opts.verbose: print '\t position conversion factor:',x_unit
-particles[:,X] *= x_unit
-particles[:,Y] *= x_unit
-particles[:,Z] *= x_unit
-#------------ Rescale Particle Velocities --------------#
-if opts.verbose: print '\t velocity conversion factor:',vel_unit
-particles[:,VX] *= vel_unit
-particles[:,VY] *= vel_unit
-particles[:,VZ] *= vel_unit
 #--------------- Order and Cut by Mass -----------------#
-""" TODO: cut by mass """
 halos = halos[halos[:,M200a].argsort()][::-1]
-print '\t highest mass of a halo: 10 ^',np.log10(halos[0][M200a])
-print '\t lowest mass of a halo: 10 ^',np.log10(halos[-1][M200a])
+
 print '\t range of halo Xs:',min(halos[:,X]),max(halos[:,X])
 print '\t range of particle Xs:',min(particles[:,X]),max(particles[:,X])
 print '\t range of halo VXs:',min(halos[:,VX]), max(halos[:,VX])
 print '\t range of particle VXs:',min(particles[:,VX]), max(particles[:,VX])
-print '\t range of halo virial radii:',min(halos[:,R200a]), max(halos[:,R200a])
+
 
 #-------------------------------------------------------#
 #---------------------- MAKE PLOTS ---------------------#
