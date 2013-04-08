@@ -30,4 +30,4 @@ I'm currently working with the following catalogs (at redshift 0):
 *    subhalo.z=00.0000
 *    halo_part.z=00.0000
 
-The subhalos were extracted by Michelle Ntampaka (Ph.D. student, Physics) - cmhicks@andrew.cmu.edu
+The subhalos in subhalo.z=00.0000 were created by Michelle Ntampaka (Ph.D. student, Physics) - cmhicks@andrew.cmu.edu
