@@ -347,39 +347,14 @@ if opts.make_hists:
 
 if opts.hy_plots:
 
+    # TEMP: consider just 1st halo + associated particles
     print
-    some_particles = np.array([p for p in particles if (p[X] > 0 and p[X] < 5 and p[Y] > 0 and p[Y] < 5 and p[Z] > 0 and p[Z] < 5)])
-    some_halos = np.array([p for p in halos if (p[X] > 0 and p[X] < 5 and p[Y] > 0 and p[Y] < 5 and p[Z] > 0 and p[Z] < 5)])
-    some_halos = some_halos[::-1] # does halo assignment change if the halos are considered in reverse order?
+    some_halos = halos[0] 
+    some_particles = particles
     print '\t first particle:'
     print some_particles[0]
     print '\t first halo:'
     print some_halos[0]
-    print '\t # of particles in 5 x 5 square:',len(some_particles)
-    print '\t # of halo centers in 5 x 5 square:',len(some_halos)
-    print '\t range of halo R200a values:',min(some_halos[:,R200a]),max(some_halos[:,R200a])
-    halo_IDs = [get_halo_ID(particle, some_halos) for particle in some_particles]
-    print '\t number of assigned particles from 5 x 5 square:',len([i for i in halo_IDs if i > -1])
-    print
-    new_particles = []
-    for i in range(len(some_particles)):
-        cur_row = [val for val in some_particles[i]]
-        cur_row.append(get_halo_ID(cur_row, some_halos))
-        new_particles.append(cur_row)
-    some_particles = np.array(new_particles)
-    labeled_particles = some_particles[ some_particles[:,-1] > -1]
-    print '\t first labeled particle:'
-    print labeled_particles[0]
-    print '\t first halo center:'
-    first_halo = some_halos[0][ID]
-    print first_halo
-    print '\t its purported mass:',some_halos[0][M200a]
-    sample = np.array([p for p in labeled_particles if p[-1] == first_halo])
-    print '\t # of particles assigned to it:',len(sample)
-    print '\t their X coords:'
-    print sample[:,X]
-    print '\t their Y coords:'
-    print sample[:,Y]
 
     data = [[some_particles[:,Y]], [some_particles[:,Z]]]
     labels = ['Y coordinate', 'Z coordinate']
@@ -388,12 +363,12 @@ if opts.hy_plots:
 
     figure(0)
     plot(some_particles[:,X], some_particles[:,Y], '.')
-#    plot(labeled_particles[:,X], labeled_particles[:,Y], '.')
     plot(some_halos[:,X], some_halos[:,Y], 'x', color='r', markersize=20, markeredgewidth=5)
     xlabel('X coordinate', fontsize=24)
     ylabel('Y coordinate', fontsize=24)
 
     figure(1)
+
     plot(some_particles[:,Y], some_particles[:,Z], '.')
 #    plot(labeled_particles[:,Y], labeled_particles[:,Z], '.')
     plot(some_halos[:,Y], some_halos[:,Z], 'x', color='r', markersize=20, markeredgewidth=5)
