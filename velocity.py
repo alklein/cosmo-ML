@@ -10,7 +10,7 @@
 
 __author__   = "Andrea Klein"
 
-from PyML import *
+#from PyML import *
 from constants import *
 
 #-------------------------------------------------------#
@@ -103,6 +103,7 @@ def get_particles(particle_file, halo_ID):
             if len(P) > 0: return np.column_stack((P[:,0], P[:,2:], P[:,1]))
             else: return P
         if cur_ID == halo_ID: P.append(particle)
+    P = np.array(P)
     if len(P) > 0: return np.column_stack((P[:,0], P[:,2:], P[:,1]))
     else: P = np.array(P)
 
@@ -156,19 +157,13 @@ VL_Phi_dot = [Phi_dot(sh[X], sh[Y], sh[Z], sh[Vx], sh[Vy], sh[Vz]) for sh in VL]
 if opts.verbose: print '\n ... Loading Hy Trac\'s Simulations ... \n'
 halos = np.loadtxt('halos.txt')
 # TEMP
-#num_part = 0
-#for line in open('particles.txt'): num_part += 1
-#print 'number of particles:',num_part
+num_part = 0
+for line in open('particles.txt'): num_part += 1
+print 'number of particles:',num_part
 # TEMP: only considering particles assigned to 1st halo
 particles = get_particles('particles.txt', halos[0][ID]) 
 #--------------- Order and Cut by Mass -----------------#
 halos = halos[halos[:,M200a].argsort()][::-1]
-
-print '\t range of halo Xs:',min(halos[:,X]),max(halos[:,X])
-print '\t range of particle Xs:',min(particles[:,X]),max(particles[:,X])
-print '\t range of halo VXs:',min(halos[:,VX]), max(halos[:,VX])
-print '\t range of particle VXs:',min(particles[:,VX]), max(particles[:,VX])
-
 
 #-------------------------------------------------------#
 #---------------------- MAKE PLOTS ---------------------#
@@ -339,21 +334,22 @@ if opts.hy_plots:
     data = [[some_particles[:,X]], [some_particles[:,Y]]]
     labels = ['X coordinate', 'Y coordinate']
     titles = ['Particle Density']
-    vis(data, labels, titles)
+#    vis(data, labels, titles)
 
     figure(0)
     plot(some_particles[:,X], some_particles[:,Y], '.')
-    plot(some_halos[:,X], some_halos[:,Y], 'x', color='r', markersize=20, markeredgewidth=5)
+    plot([halos[0][X]], [halos[0][Y]], 'x', color='r', markersize=20, markeredgewidth=5)
+#    plot(some_halos[:,X], some_halos[:,Y], 'x', color='r', markersize=20, markeredgewidth=5)
     xlabel('X coordinate', fontsize=24)
     ylabel('Y coordinate', fontsize=24)
 
-    figure(1)
+#    figure(1)
 
-    plot(some_particles[:,Y], some_particles[:,Z], '.')
+#    plot(some_particles[:,Y], some_particles[:,Z], '.')
 #    plot(labeled_particles[:,Y], labeled_particles[:,Z], '.')
-    plot(some_halos[:,Y], some_halos[:,Z], 'x', color='r', markersize=20, markeredgewidth=5)
-    xlabel('Y coordinate', fontsize=24)
-    ylabel('Z coordinate', fontsize=24)
+#    plot(some_halos[:,Y], some_halos[:,Z], 'x', color='r', markersize=20, markeredgewidth=5)
+#    xlabel('Y coordinate', fontsize=24)
+#    ylabel('Z coordinate', fontsize=24)
 
 if opts.make_plots or opts.make_hists or opts.hy_plots: show()
 
