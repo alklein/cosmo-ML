@@ -155,10 +155,12 @@ VL_Phi_dot = [Phi_dot(sh[X], sh[Y], sh[Z], sh[Vx], sh[Vy], sh[Vz]) for sh in VL]
 
 if opts.verbose: print '\n ... Loading Hy Trac\'s Simulations ... \n'
 halos = np.loadtxt('halos.txt')
+# TEMP
+#num_part = 0
+#for line in open('particles.txt'): num_part += 1
+#print 'number of particles:',num_part
 # TEMP: only considering particles assigned to 1st halo
 particles = get_particles('particles.txt', halos[0][ID]) 
-#------------- Reorder Particle Properties -------------#
-particles = np.column_stack((particles[:,0], particles[:,2:], particles[:,1]))
 #--------------- Order and Cut by Mass -----------------#
 halos = halos[halos[:,M200a].argsort()][::-1]
 
@@ -330,19 +332,14 @@ if opts.make_hists:
 
 if opts.hy_plots:
 
-    # TEMP: consider just 1st halo + associated particles
     print
-    some_halos = halos[0] 
     some_particles = particles
-    print '\t first particle:'
-    print some_particles[0]
-    print '\t first halo:'
-    print some_halos[0]
+    some_halos = halos[0] 
 
-    data = [[some_particles[:,Y]], [some_particles[:,Z]]]
-    labels = ['Y coordinate', 'Z coordinate']
+    data = [[some_particles[:,X]], [some_particles[:,Y]]]
+    labels = ['X coordinate', 'Y coordinate']
     titles = ['Particle Density']
-#    vis(data, labels, titles)
+    vis(data, labels, titles)
 
     figure(0)
     plot(some_particles[:,X], some_particles[:,Y], '.')
