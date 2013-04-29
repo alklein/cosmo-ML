@@ -10,7 +10,9 @@
 
 __author__   = "Andrea Klein"
 
-#from PyML import *
+import chunk_manager
+
+from PyML import *
 from constants import *
 
 #-------------------------------------------------------#
@@ -91,8 +93,25 @@ def Phi_dot(X, Y, Z, VX, VY, VZ):
     denom = (X**2 + Y**2 + Z**2)*((X**2 + Y**2)**.5)
     return num/denom
 
-#------------------- Particle Extraction -------------------#
+def V_rel(p, halos):
+    h = halos[p[H_ID]]
+    return (p[VX] - h[VX], p[VY] - h[VY], p[VZ] - h[VZ])
 
+def Vnet_rel(p, halos):
+    (pvx, pvy, pvz) = V_rel(p, halos)
+    return Vnet(pvx, pvy, pvz)
+
+def Vs_rel(p, halos):
+    h = halos[p[H_ID]]
+    return (p[VX] - h[VX], p[VY] - h[VY], p[VZ] - h[VZ])
+
+def Pos_rel(p, halos):
+    h = halos[p[H_ID]]
+    return (p[X] - h[X], p[Y] - h[Y], p[Z] - h[Z])
+
+#---------------- Data Creation / Extraction ----------------#
+
+# efficient for high-mass halos only
 def get_particles(particle_file, halo_ID):
     P = []
     for line in open(particle_file):
@@ -107,6 +126,27 @@ def get_particles(particle_file, halo_ID):
     if len(P) > 0: return np.column_stack((P[:,0], P[:,2:], P[:,1]))
     else: P = np.array(P)
 
+def get_training_data(halos, min_halo_ID, max_halo_ID, filename_dict, num_halos, p_per_halo=1):
+    data = []
+    which_halos = np.random.randint(min_halo_ID, max_halo_ID + 1, num_halos)
+    for h in which_halos:
+        P = chunk_manager.fetch(h, filename_dict)
+        Vs = [Vnet_rel(p, halos) for p in P]
+        for i in range(p_per_halo): 
+            p = P[np.random.randint(0, high=len(P))]
+            p = [val for val in p]
+            p.append(np.average(Vs))
+            p.append(np.std(Vs))
+            data.append(p)
+    return np.array(data)
+
+def save_training_data(halos, min_halo_ID, max_halo_ID, filename_dict, num_halos, size_name, how_many = 5):
+    for i in range(how_many):
+        train_data = get_training_data(halos, min_halo_ID, max_halo_ID, filename_dict, num_halos)
+        filename = size_name + '_' + str(i) + '.txt'
+        print 'saving file:',filename
+        np.savetxt(filename, train_data)
+        
 
 #-----------------------------------------------------------#
 #---------------------- PARSE OPTIONS ----------------------#
@@ -131,7 +171,7 @@ if (not are_args):
 #-------------------- GET AQ/VL DATA -------------------#
 #-------------------------------------------------------#
 
-if opts.verbose: print '\n ... Loading Aquarius and Via Lactea II ...'
+if opts.verbose: print '\n ... Loading Aquarius A and Via Lactea II ...'
 AQ = np.loadtxt('AqA_NoMainHalo.txt')
 VL = np.loadtxt('VL2_NoMainHalo.txt')
 #--------------- Cut at Virial Radius ----------------#
@@ -154,17 +194,118 @@ VL_Phi_dot = [Phi_dot(sh[X], sh[Y], sh[Z], sh[Vx], sh[Vy], sh[Vz]) for sh in VL]
 #--------------------- GET HY DATA ---------------------#
 #-------------------------------------------------------#
 
-if opts.verbose: print '\n ... Loading Hy Trac\'s Simulations ... \n'
-halos = np.loadtxt('halos.txt')
-# TEMP
-num_part = 0
-for line in open('particles.txt'): num_part += 1
-print 'number of particles:',num_part
-# TEMP: only considering particles assigned to 1st halo
-particles = get_particles('particles.txt', halos[0][ID]) 
-#--------------- Order and Cut by Mass -----------------#
-halos = halos[halos[:,M200a].argsort()][::-1]
+if opts.verbose: print '\n ... Loading Hy Trac\'s Simulations ... '
+#--------------- Select, Order, and Cut Halos -----------------#
+halo_file = 'halos.txt'
+halos = np.loadtxt(halo_file)
+halos = halos[halos[:,M200a].argsort()][::-1] # already done?
+halos = halos[halos[:,N200a] > 1000]
+#----------------------- Manage Chunks ------------------------#
+ID_bounds = chunk_manager.get_ID_bounds(halo_file)
+filename_dict = chunk_manager.get_filename_dict(ID_bounds)
+#------------------- Select Training Data ---------------------#
+train_file = 'train/tiny_0.txt'
+train_data = np.loadtxt(train_file)
 
+#-------------------------------------------------------#
+#------------------------- SVR -------------------------#
+#-------------------------------------------------------#
+
+if opts.verbose: print '\n ... Training Classifier ... '
+exit(0)
+
+#-------------------------------------------------------#
+#---------------------- WORKSPACE ----------------------#
+#-------------------------------------------------------#
+
+save_training_data(halos, 1, 10000, filename_dict, 10, 'tiny')
+
+light_halos = halos[halos[:,M200a] < 10**14]
+print 'first light halo:',light_halos[0]
+print 'ID:',light_halos[0][ID]
+print 'mass: 10 ^',np.log10(light_halos[0][M200a])
+
+i = 0
+h = halos[i]
+while np.log10(h[M200a] > 13): 
+    i += 1
+    h = halos[i]
+print 'first halo w/ mass below 10^13:',halos[i][ID]
+
+Ns = [N for N in halos[:,N200a] if N > 1000]
+Ms = [N*4.5*10**9 for N in Ns]
+Vs = [Vnet_rel(p, halos) for p in particles]
+Rs = [((p[X] - halos[which][X])**2 + (p[Y] - halos[which][Y])**2 + (p[Z] - halos[which][Z])**2)**.5 for p in particles]
+Xrel, Yrel, Zrel = [], [], []
+VXrel, VYrel, VZrel = [], [], []
+for p in particles:
+    (xx, yy, zz) = Pos_rel(p, halos)
+    (vx, vy, vz) = Vs_rel(p, halos)
+    Xrel.append(xx)
+    Yrel.append(yy)
+    Zrel.append(zz)
+    VXrel.append(vx)
+    VYrel.append(vy)
+    VZrel.append(vz)
+Rdot_rel = [R_dot(Xrel[i], Yrel[i], Zrel[i], VXrel[i], VYrel[i], VZrel[i]) for i in range(len(particles))]
+
+#print 'number of halos with > 1000 particles:',len(Ns)
+#print 'number of particles in those halos:',sum(Ns)
+#print 'max mass: 10 ^',np.log10(max(Ms))
+#print 'min mass: 10 ^',np.log10(min(Ms))
+#print
+p0 = particles[0]
+h0 = halos[which]
+print 'halo under consideration:',h0[ID]
+print 'its # particles:',h0[N200a]
+print 'its mass: 10 ^',np.log10(h0[M200a])
+
+#figure(0)
+#semilogx(halos[:,M200a], halos[:,vcmax], '.')
+#xlabel('Mass (Msun)', fontsize=24)
+#ylabel('Vcmax (km/s)', fontsize=24)
+"""
+figure(1)
+hist(np.log10(halos[:,N200a]), bins=50, log=True)
+xlabel('Log(Number of Particles)', fontsize=24)
+title('Distribution of Halo Particle Counts', fontsize=30)
+axes = gca()
+axvline(x = 3, color = 'r', linewidth = 3)
+
+print
+print 'len Rs:',len(Rs)
+print 'len Vs:',len(Vs)
+print 'range Rs:',min(Rs),max(Rs)
+
+data = [[np.array(Rs)], [np.log10(Vs)]]
+labels = ['Radial Position (mpc/h)', 'Log(Vnet) (km/s)']
+titles = ['Velocity as a function of radius']
+#vis(data, labels, titles)
+
+figure(2)
+hist(Vs, bins=50)
+xlabel('Vnet (km/s)', fontsize=24)
+title('Distribution of Net Particle Velocities', fontsize=30)
+axes = gca()
+axvline(x = halos[which][vcmax], color = 'r', linewidth = 3)
+
+figure(3)
+plot(Rs, np.log10(Vs), '.')
+xlabel('Radial Position (mpc/h)', fontsize=24)
+ylabel('Log(Vnet) (km/s)', fontsize=24)
+title('Velocity as a function of radius', fontsize=30)
+axes = gca()
+axvline(x = halos[which][rcmax], color = 'r', linewidth = 3)
+axvline(x = halos[which][R200a], color = 'g', linewidth = 3)
+
+figure(4)
+plot(Rs, Rdot_rel, '.')
+xlabel('Radial Position (mpc/h)', fontsize=24)
+ylabel(r'$\mathrm{\dot{R}}$ (km/s)', fontsize=24)
+title('Radial velocity component as a function of radius', fontsize=24)
+
+show()
+"""
 #-------------------------------------------------------#
 #---------------------- MAKE PLOTS ---------------------#
 #-------------------------------------------------------#
