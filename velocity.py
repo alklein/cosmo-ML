@@ -14,6 +14,7 @@ import chunk_manager
 
 from PyML import *
 from constants import *
+from PyML.classifiers.svm import SVR
 
 #-------------------------------------------------------#
 #---------------------- FUNCTIONS ----------------------#
@@ -204,14 +205,56 @@ halos = halos[halos[:,N200a] > 1000]
 ID_bounds = chunk_manager.get_ID_bounds(halo_file)
 filename_dict = chunk_manager.get_filename_dict(ID_bounds)
 #------------------- Select Training Data ---------------------#
-train_file = 'train/tiny_0.txt'
-train_data = np.loadtxt(train_file)
+train_file = 'med_train_std.data'
 
 #-------------------------------------------------------#
 #------------------------- SVR -------------------------#
 #-------------------------------------------------------#
 
-if opts.verbose: print '\n ... Training Classifier ... '
+if opts.verbose: print '\n ... Training Classifier ... \n'
+#----------------------- Prepare Data -------------------------#
+traindata = SparseDataSet(train_file, numericLabels = True)
+traindata.normalize(2) # TODO: try again with L2 norm, possibly other norms
+Cs = [2e-5, 2e-4, 2e-3, 2e-2, 2e-1, 2e0, 2e1, 2e2, 2e3, 2e4, 2e5] # 2e7, 2e9] #, 2e11, 2e13, 2e15]
+#----------------------- Linear Kernel ------------------------#
+lin_errs = []
+for c in Cs:
+    s = SVR(C = c)
+    s.train(traindata)
+    r = s.cv(traindata, 5)
+    lin_errs.append(r)
+#---------------------- Gaussian Kernel -----------------------#
+Gs = [2e-15, 2e-13, 2e-11, 2e-9, 2e-7, 2e-5, 2e-3, 2e-1] #, 2e1, 2e3]
+gauss_errs = []
+for c in Cs:
+    err_row = []
+    for g in Gs:
+        traindata.attachKernel('gaussian', gamma = g)
+        s = SVR(C = c)
+        s.train(traindata)
+        r = s.cv(traindata, 5)
+        err_row.append(r)
+    gauss_errs.append(err_row)
+#---------------------- Polynomial Kernel ----------------------#
+poly_errs = []
+traindata.attachKernel('polynomial')
+for c in Cs:
+    s = SVR(C = c)
+    s.train(traindata)
+    r = s.cv(traindata, 5)
+    poly_errs.append(err_row)
+#-------------------------- Results ----------------------------#
+print
+print 'Cs:'
+print Cs
+print 'linear errors:'
+print lin_errs
+print 'poly errors:'
+print poly_errs
+print
+print 'minimum error with linear kernel:',min(lin_errs)
+print 'minimum error with gaussian kernel:',min([min(row) for row in gauss_errs])
+print 'minimum error with deg-2 poly kernel:',min([min(row) for row in poly_errs])
 exit(0)
 
 #-------------------------------------------------------#
