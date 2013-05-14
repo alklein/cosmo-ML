@@ -2,16 +2,17 @@
 =======================
 
 This is a research project in cosmology and machine learning. 
-The goal is to learn the velocity distributions within dark matter halos using support vector regression. 
+The goal is to learn the velocity distributions within dark matter halos using support vector regression (SVR). 
 I am receiving course credit via the Machine Learning class 10-602, Independent Study: Research, at Carnegie Mellon University.
 
 My Code
 -------
 
-*   parse_halos.py - Python parser for N-body binary output file describing halos 
-*   parse_particles.cpp - C++ parser for N-body binary output file describing individual particles
-*   constants.py - Relevant constants, including scientific quantities, simulation parameters, and named indices for use with parsed data     		      
-*   velocity.py - Python script to learn the velocity distributions. Run "python velocity.py -h True" for more details.
+*   parse_halos.py - Python parser for N-body binary output file describing halos. 
+*   parse_particles.cpp - C++ parser for N-body binary output file describing individual particles.
+*   constants.py - Relevant constants, including scientific quantities, simulation parameters, and named indices for use with parsed data.     		      
+*   chunk_manager.py - Rough solution to allow faster manipulation of the (very large) particle data. Allows me to partition the data into .txt "chunks" such that any halo's associated particles can be accessed as quickly as the first halo's. 
+*   velocity.py - Python script to generate training data and learn a parametrization of the halos' internal velocity distributions via SVR. Run "python velocity.py -h True" for more details.
 
 Acknowledgements
 ----------------
