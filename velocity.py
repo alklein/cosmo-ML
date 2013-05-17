@@ -147,7 +147,39 @@ def save_training_data(halos, min_halo_ID, max_halo_ID, filename_dict, num_halos
         filename = size_name + '_' + str(i) + '.txt'
         print 'saving file:',filename
         np.savetxt(filename, train_data)
-        
+
+#---------------------- Custom ML ----------------------#
+
+def RMSE(Y1s, Y2s):
+    return (sum([(Y1s[i] - Y2s[i])**2 for i in range(len(Y1s))])/len(Y1s))**.5
+
+def cross_validate(s, data):
+    errs = []
+    for i in range(len(data)):
+        trainset = data[i]
+        testsets = data[:i] + data[i+1:]
+        s.train(trainset)
+        err_row = []
+        for testset in testsets:
+            r = s.test(testset)
+            #print 'r:',r
+            orig_Ys = r.getGivenLabels()
+            SVR_Ys = r.Y
+            print 'orig Ys:',orig_Ys
+            print 'SVR Ys:',SVR_Ys
+            err = RMSE(SVR_Ys, orig_Ys)
+            err_row.append(err)
+        errs.append(err_row)
+    return errs
+
+def test_errs(s, trainset, testset):
+    s.train(trainset)
+    r = s.test(testset)
+    orig_Ys = r.getGivenLabels()
+    SVR_Ys = r.Y
+    print 'orig Ys:',orig_Ys
+    print 'SVR Ys:',SVR_Ys
+    return r
 
 #-----------------------------------------------------------#
 #---------------------- PARSE OPTIONS ----------------------#
@@ -204,25 +236,70 @@ halos = halos[halos[:,N200a] > 1000]
 #----------------------- Manage Chunks ------------------------#
 ID_bounds = chunk_manager.get_ID_bounds(halo_file)
 filename_dict = chunk_manager.get_filename_dict(ID_bounds)
-#------------------- Select Training Data ---------------------#
-train_file = 'med_train_std.data'
 
 #-------------------------------------------------------#
 #------------------------- SVR -------------------------#
 #-------------------------------------------------------#
 
+data = np.loadtxt('enhanced_halos.txt')
+data = data[:1000] # cut to med data set size
+As = ((math.pi/8.)**.5)*data[:,-2]
+avg_A = np.average(As)
+rmse = sum([(As[i] - avg_A)**2 for i in range(len(As))])/len(As)
+print '\tRMSE using avg as estimate:',rmse
+
 if opts.verbose: print '\n ... Training Classifier ... \n'
+#------------------- Select Training Data ---------------------#
+train_file = 'med_train_max.data'
+test_file = 'med_test_max.data'
 #----------------------- Prepare Data -------------------------#
 traindata = SparseDataSet(train_file, numericLabels = True)
-traindata.normalize(2) # TODO: try again with L2 norm, possibly other norms
-Cs = [2e-5, 2e-4, 2e-3, 2e-2, 2e-1, 2e0, 2e1, 2e2, 2e3, 2e4, 2e5] # 2e7, 2e9] #, 2e11, 2e13, 2e15]
+testdata = SparseDataSet(test_file, numericLabels = True)
+traindata.normalize(1)
+testdata.normalize(1)
+
+"""
+size = 'med'
+D0 = SparseDataSet(size + '_max_0.data', numericLabels = True)
+D1 = SparseDataSet(size + '_max_1.data', numericLabels = True)
+D2 = SparseDataSet(size + '_max_2.data', numericLabels = True)
+D3 = SparseDataSet(size + '_max_3.data', numericLabels = True)
+D4 = SparseDataSet(size + '_max_4.data', numericLabels = True)
+
+D0.normalize(1)
+D1.normalize(1)
+D2.normalize(1)
+D3.normalize(1)
+D4.normalize(1)
+
+K0 = SparseDataSet('large_max_0.data', numericLabels = True)
+K0.normalize(1)
+"""
+#Cs = [2e-5, 2e-4, 2e-3, 2e-2, 2e-1, 2e0, 2e1, 2e2, 2e3, 2e4, 2e5, 2e7, 2e9] #, 2e11, 2e13, 2e15]
+Cs = [2e-5, 2e-4, 2e-3, 2e-2, 2e-1, 2e0, 2e1, 2e2, 2e3, 2e4, 2e5, 2*10**6.5, 2*10**7, 2*10**7.5, 2*10**8, 2*10**8.5] #, 2*10**9.]
 #----------------------- Linear Kernel ------------------------#
 lin_errs = []
 for c in Cs:
     s = SVR(C = c)
     s.train(traindata)
-    r = s.cv(traindata, 5)
-    lin_errs.append(r)
+    errs = s.cv(testdata, 4)
+    lin_errs.append(errs)
+    #errs = test_errs(s, K0, D0)
+    #errs = cross_validate(s, [K0, D1])
+    #for line in errs: print errs
+    #s.train(traindata)
+    #r = s.test(testdata)
+    #given = r.getGivenLabels()
+    #Ys = r.Y
+    #print 'test labels:',Ys
+    #lin_errs.append(r)
+
+print 'Cs:'
+print Cs
+print 'linear errors:'
+print lin_errs
+# TODO: divide data into 5 sets per dataset size; write own CV function; plot expected vs. actual Ys
+exit(0) # TEMP
 #---------------------- Gaussian Kernel -----------------------#
 Gs = [2e-15, 2e-13, 2e-11, 2e-9, 2e-7, 2e-5, 2e-3, 2e-1] #, 2e1, 2e3]
 gauss_errs = []
@@ -232,7 +309,7 @@ for c in Cs:
         traindata.attachKernel('gaussian', gamma = g)
         s = SVR(C = c)
         s.train(traindata)
-        r = s.cv(traindata, 5)
+        r = s.cv(testdata, 4)
         err_row.append(r)
     gauss_errs.append(err_row)
 #---------------------- Polynomial Kernel ----------------------#
@@ -241,7 +318,7 @@ traindata.attachKernel('polynomial')
 for c in Cs:
     s = SVR(C = c)
     s.train(traindata)
-    r = s.cv(traindata, 5)
+    r = s.cv(testdata, 4)
     poly_errs.append(err_row)
 #-------------------------- Results ----------------------------#
 print
